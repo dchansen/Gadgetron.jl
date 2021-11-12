@@ -1,0 +1,13 @@
+name = "Gadgetron"
+uuid = "4c6004d8-adb7-4345-8c4a-7c94f8948e94"
+authors = ["David C Hansen <davidchansen@gradientsoftware.net> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
