@@ -55,7 +55,7 @@ end
 
 function Base.iterate(connection::Connection, state=nothing)
 	message_id = read(connection.socket,UInt16)
-	if message_id == CLOSE 
+	if message_id == UInt16(CLOSE)
 		return nothing
 	end
 
@@ -63,6 +63,10 @@ function Base.iterate(connection::Connection, state=nothing)
 	message = MRD.read(connection.socket,message_type)
 	return (message,nothing)
 end
+
+Base.IteratorSize(::Type{Connection}) = Base.SizeUnknown()
+Base.IteratorEltype(::Type{Connection}) = Base.EltypeUnknown()
+
 
 function push!(connection::Connection, message )
 	message_id = message_types[typeof(message)]
