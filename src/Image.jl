@@ -54,7 +54,7 @@ end
     phase::UInt16 = 0
     repetition::UInt16 = 0
     set::UInt16 = 0
-    acquisition_time_stamp::UInt16 = 0
+    acquisition_time_stamp::UInt32 = 0
     physiology_time_stamp::NTuple{3,UInt32} = (0, 0, 0)
     image_type::ImageType.Enm = ImageType.magnitude
     image_index::UInt16 = 0
@@ -64,11 +64,11 @@ end
 end
 
 
-struct Image{T}
+struct Image{T<:Real}
     header::ImageHeader
     data::Array{T,4}
     meta::MetaDict
-    function Image{T}(header, data, meta = MetaDict()) where {T}
+    function Image{T}(header::ImageHeader, data::Array{T}, meta = MetaDict())  where {T<:Real}
         is_mrd_datatype(T) || error("Only MRD standard types supported")
         ndims(data) <= 4 || error("Images have a maximum of 4 dimensions")
         data = reshape(data, Val(4))
@@ -98,7 +98,7 @@ struct RawImageHeader
     phase::UInt16
     repetition::UInt16
     set::UInt16
-    acquisition_time_stamp::UInt16
+    acquisition_time_stamp::UInt32
     physiology_time_stamp::NTuple{3,UInt32}
     image_type::ImageType.Enm
     image_index::UInt16
@@ -152,16 +152,16 @@ end
 
 
 function ImageHeader(acq::AcquisitionHeader; kwargs...)
-    names = (:version, :measurement_uid, :position, :read_dir, :phase_dir, :slice_dir, :patient_table_position, :acquisition_time_stamp, :physiology_time_stamp, :usr_int, :usr_float )
+    names = (:version, :measurement_uid, :position, :read_dir, :phase_dir, :slice_dir, :patient_table_position, :acquisition_time_stamp, :physiology_time_stamp, :user_int, :user_float )
 
-    fields_acq = (n => getfield(acq,n) for n in names)
+    fields_acq = LittleDict(n => getfield(acq,n) for n in names)
 
-    names_idx = (:average,:slice, :contract,:phase,:repetition, :set)
-    fields_idx = (n => getfield(acq.idx,n) for n in names_idx)
+    names_idx = (:average,:slice, :contrast,:phase,:repetition, :set)
+    fields_idx = LittleDict(n => getfield(acq.idx,n) for n in names_idx)
 
     fields = merge(fields_acq,fields_idx,kwargs)
 
-    return ImageHeader(fields...)
+    return ImageHeader(;fields...)
 end 
 
 write(io::IO, header::RawImageHeader) = fieldnames(ImageHeader) .|> getfield $ header .|> write $ io

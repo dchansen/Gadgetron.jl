@@ -102,7 +102,7 @@ end
 
 
 
-struct Acquisition
+mutable struct Acquisition
     header::AcquisitionHeader
     data::Array{ComplexF32,2}
     trajectory::Union{Array{Float32},Nothing} 
