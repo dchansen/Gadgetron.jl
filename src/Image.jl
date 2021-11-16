@@ -64,12 +64,12 @@ end
 end
 
 
-struct Image{T<:Real}
+struct Image
     header::ImageHeader
-    data::Array{T,4}
+    data::Array{T,4} where {T<:Real}
     meta::MetaDict
-    function Image{T}(header::ImageHeader, data::Array{T}, meta = MetaDict())  where {T<:Real}
-        is_mrd_datatype(T) || error("Only MRD standard types supported")
+    function Image(header::ImageHeader, data::Array, meta = MetaDict())  
+        is_mrd_datatype(eltype(data)) || error("Only MRD standard types supported")
         ndims(data) <= 4 || error("Images have a maximum of 4 dimensions")
         data = reshape(data, Val(4))
         new(header, data, meta)
@@ -107,10 +107,10 @@ struct RawImageHeader
     user_float::NTuple{8,Float32}
 end
 
-function RawImageHeader(image::Image{T}) where {T}
+function RawImageHeader(image::Image) 
     channels = UInt16(size(image.data)[4])
     matrix_size = Tuple{UInt16,UInt16,UInt16}(size(image.data)[1:3])
-    data_type = type_to_datatype[T]
+    data_type = type_to_datatype[eltype(image.data)]
     hdr = image.header
 
     RawImageHeader(
@@ -164,14 +164,16 @@ function ImageHeader(acq::AcquisitionHeader; kwargs...)
     return ImageHeader(;fields...)
 end 
 
-write(io::IO, header::RawImageHeader) = fieldnames(ImageHeader) .|> getfield $ header .|> write $ io
+write(io::IO, header::RawImageHeader) = fieldnames(RawImageHeader) .|> getfield $ header .|> write $ io
 
 function write(io::IO, img::Image)
+    println("Size of raw header ",sizeof(RawImageHeader))
     write(io, RawImageHeader(img))
+    write(io,img.meta)
     Base.write(io, img.data)
 end
 
-read(io::IO, ::Type{RawImageHeader}) = RawImageHeader((fieldnames(ImageHeader) .|> fieldtype $ RawImageHeader .|> read $ io)...)
+read(io::IO, ::Type{RawImageHeader}) = RawImageHeader((fieldnames(RawImageHeader) .|> fieldtype $ RawImageHeader .|> read $ io)...)
 
 function read(io::IO, ::Type{Image})
     header = MRD.read(io, RawImageHeader) 

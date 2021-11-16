@@ -64,7 +64,11 @@ function read(io::IO, ::Type{MetaDict})
 end
 
 function write(io::IO, meta::MetaDict)
-    if isempty(meta) return end
+    if isempty(meta) 
+        MRD.write_string(io,"",UInt64)
+        return
+    end
+
     doc = EzXML.XMLDocument()
     base = EzXML.ElementNode("ismrmrdMeta")
 

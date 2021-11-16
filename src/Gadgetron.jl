@@ -68,10 +68,10 @@ Base.IteratorSize(::Type{Connection}) = Base.SizeUnknown()
 Base.IteratorEltype(::Type{Connection}) = Base.EltypeUnknown()
 
 
-function push!(connection::Connection, message )
+function Base.push!(connection::Connection, message )
 	message_id = message_types[typeof(message)]
 	write(connection.socket,message_id)
-	write(connection.socket,message)
+	MRD.write(connection.socket,message)
 end
 
 
