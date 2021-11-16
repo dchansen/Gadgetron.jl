@@ -164,16 +164,15 @@ function ImageHeader(acq::AcquisitionHeader; kwargs...)
     return ImageHeader(;fields...)
 end 
 
-write(io::IO, header::RawImageHeader) = fieldnames(RawImageHeader) .|> getfield $ header .|> write $ io
+write(io::IO, header::RawImageHeader) = fieldnames(RawImageHeader) .|> getfield $ header .|> Base.write $ io
 
 function write(io::IO, img::Image)
-    println("Size of raw header ",sizeof(RawImageHeader))
     write(io, RawImageHeader(img))
     write(io,img.meta)
     Base.write(io, img.data)
 end
 
-read(io::IO, ::Type{RawImageHeader}) = RawImageHeader((fieldnames(RawImageHeader) .|> fieldtype $ RawImageHeader .|> read $ io)...)
+read(io::IO, ::Type{RawImageHeader}) = RawImageHeader((fieldnames(RawImageHeader) .|> fieldtype $ RawImageHeader .|> Base.read $ io)...)
 
 function read(io::IO, ::Type{Image})
     header = MRD.read(io, RawImageHeader) 
@@ -185,8 +184,3 @@ function read(io::IO, ::Type{Image})
     return Image(ImageHeader(header), data, meta)
 
 end
-
-function Base.:(==)(img1::Image,img2::Image)
-    return img1.header == img2.header && img1.data == img2.data && img1.meta == img2.meta 
-end
-

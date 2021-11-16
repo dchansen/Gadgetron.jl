@@ -42,8 +42,8 @@ end
     :(WaveformHeader($(args...)))
 end
 
-write(io::IO, header::RawWaveformHeader) = fieldnames(WaveformHeader) .|> getfield $ header .|> write $ io
-read(io::IO, ::Type{RawWaveformHeader}) = WaveformHeader((fieldnames(WaveformHeader) .|> fieldtype $ WaveformHeader .|> read $ io)...)
+write(io::IO, header::RawWaveformHeader) = fieldnames(RawWaveformHeader) .|> getfield $ header .|> Base.write $ io
+read(io::IO, ::Type{RawWaveformHeader}) = RawWaveformHeader((fieldnames(RawWaveformHeader) .|> fieldtype $ RawWaveformHeader .|> Base.read $ io)...)
 
 function read(io::IO, ::Type{Waveform})
     header = MRD.read(io::IO, RawWaveformHeader)

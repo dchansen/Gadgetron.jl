@@ -130,8 +130,8 @@ end
 end
 
 
-write(io::IO, header::RawAcquisitionHeader) = fieldnames(RawAcquisitionHeader) .|> getfield $ header .|> write $ io
-read(io::IO, ::Type{RawAcquisitionHeader}) = RawAcquisitionHeader((fieldnames(RawAcquisitionHeader) .|> fieldtype $ RawAcquisitionHeader .|> read $ io)...)
+write(io::IO, header::RawAcquisitionHeader) = fieldnames(RawAcquisitionHeader) .|> getfield $ header .|> Base.write $ io
+read(io::IO, ::Type{RawAcquisitionHeader}) = RawAcquisitionHeader((fieldnames(RawAcquisitionHeader) .|> fieldtype $ RawAcquisitionHeader .|> Base.read $ io)...)
 
 function read(io::IO, ::Type{Acquisition})
     header = MRD.read(io::IO, RawAcquisitionHeader)
