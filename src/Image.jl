@@ -3,8 +3,8 @@ include("MetaDict.jl")
 
 export Image, ImageHeader, ImageFlags
 
-@enm ImageType::UInt16 magnitude = 1 phase = 2 real = 3 imag = 4 complex = 5
-@enm TypeIndex::UInt16 ushort = 1 short = 2 uint = 3 int = 4 float = 5 double = 6 cxfloat =
+@MRD.enm ImageType::UInt16 magnitude = 1 phase = 2 real = 3 imag = 4 complex = 5
+@MRD.enm TypeIndex::UInt16 ushort = 1 short = 2 uint = 3 int = 4 float = 5 double = 6 cxfloat =
     7 cxdouble = 8
 
 datatype_to_type = Base.Dict{TypeIndex.Enm,Type}([
@@ -180,8 +180,13 @@ function read(io::IO, ::Type{Image})
     meta = MRD.read(io, MetaDict)
     data_type = datatype_to_type[header.data_type]
     
-    data = Array{data_type,4}(undef, header.matrix_size[0], header.matrix_size[1], header.matrix_size[2], header.channels)
+    data = Array{data_type,4}(undef, header.matrix_size[1], header.matrix_size[2], header.matrix_size[3], header.channels)
     Base.read!(io, data)
     return Image(ImageHeader(header), data, meta)
 
 end
+
+function Base.:(==)(img1::Image,img2::Image)
+    return img1.header == img2.header && img1.data == img2.data && img1.meta == img2.meta 
+end
+
