@@ -10,7 +10,7 @@ include("Types.jl")
 
 @Base.enum fixed_message_ids::UInt16 FILENAME = 1 CONFIG = 2 HEADER = 3 CLOSE = 4 TEXT = 5 QUERY =6 RESPONSE = 7 ERROR = 8
 
-export listen, register_type, MRD
+export listen, register_type, MRD, close_connection
 
 
 const message_ids = Dict{UInt16,Type}([(1008,MRD.Acquisition),(1022,MRD.Image),(1026, MRD.Waveform,1026),(1050,Types.Bucket),(1051, Types.Bundle)])
@@ -23,10 +23,14 @@ function register_type!(type::Type, message_id::UInt16)
 end
 
 
-struct Connection
+mutable struct Connection
 	socket::IO
 	config
-	header
+	header::MRD.MRDHeader
+	function Connection(socket, config, header)
+		conn = new(socket,config, header)
+		finalizer(close_connection,conn)
+	end
 end
 
 
@@ -36,6 +40,15 @@ listen(addr, port::Integer) = Sockets.listen(Sockets.IPv6(0),addr,port) |> Socke
 listen(port::Integer) = Sockets.listen(Sockets.IPv6(0),port) |> Sockets.accept |> Connection
 
 read_id(x) = Sockets.read(x,UInt16)
+
+function close_connection(connection::Connection) 
+	if typeof(connection.socket) == Sockets.TCPSocket
+		if iswritable(connection.socket) 
+			write(connection.socket,CLOSE)
+			Sockets.close(connection.socket)
+		end
+	end
+end 
 
 
 function read_config(socket::IO)

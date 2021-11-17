@@ -21,16 +21,18 @@ end
 
 @testset "ImageSize" begin 
 
+    img = MRD.Image(MRD.ImageHeader(),zeros(Float32,1,1,1,1))
+    header = MRD.RawImageHeader(img)
+
     io = IOBuffer()
-    header = MRD.ImageHeader()
+
     MRD.write(io,header)
 
-    @test position(io) == 192
+    @test position(io) == 198
     meta = MRD.MetaDict()
     MRD.write(io,meta)
-    @test position(io) == (192+8)
+    @test position(io) == (198+8)
 
     io = IOBuffer()
 
-    image = Image(ImageHeader(),)
 end 

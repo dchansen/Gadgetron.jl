@@ -105,6 +105,7 @@ struct RawImageHeader
     image_series_index::UInt16
     user_int::NTuple{8,Int32}
     user_float::NTuple{8,Float32}
+    attribute_string_len::UInt32
 end
 
 function RawImageHeader(image::Image) 
@@ -112,6 +113,7 @@ function RawImageHeader(image::Image)
     matrix_size = Tuple{UInt16,UInt16,UInt16}(size(image.data)[1:3])
     data_type = type_to_datatype[eltype(image.data)]
     hdr = image.header
+    attribute_string_len = ncodeunits(to_xml_string(image.meta))
 
     RawImageHeader(
         hdr.version,
@@ -139,6 +141,7 @@ function RawImageHeader(image::Image)
         hdr.image_series_index,
         hdr.user_int,
         hdr.user_float,
+        attribute_string_len        
     )
 
 end
@@ -164,7 +167,7 @@ function ImageHeader(acq::AcquisitionHeader; kwargs...)
     return ImageHeader(;fields...)
 end 
 
-write(io::IO, header::RawImageHeader) = fieldnames(RawImageHeader) .|> getfield $ header .|> Base.write $ io
+write(io::IO, header::RawImageHeader) = fieldnames(RawImageHeader) .|> getfield $ header .|> MRD.unsafe_write $ io
 
 function write(io::IO, img::Image)
     write(io, RawImageHeader(img))
@@ -172,7 +175,7 @@ function write(io::IO, img::Image)
     Base.write(io, img.data)
 end
 
-read(io::IO, ::Type{RawImageHeader}) = RawImageHeader((fieldnames(RawImageHeader) .|> fieldtype $ RawImageHeader .|> Base.read $ io)...)
+read(io::IO, ::Type{RawImageHeader}) = RawImageHeader((fieldnames(RawImageHeader) .|> fieldtype $ RawImageHeader .|> MRD.unsafe_read $ io)...)
 
 function read(io::IO, ::Type{Image})
     header = MRD.read(io, RawImageHeader) 
