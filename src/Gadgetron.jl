@@ -1,10 +1,9 @@
-
-
 module Gadgetron
 import Sockets 
 
 using PartialFunctions
 
+#include("Main.jl")
 include("MRD.jl")
 include("Types.jl")
 include("StreamAlgorithms.jl")
@@ -41,7 +40,7 @@ mutable struct MRDRemoteConnection <: AbstractChannel{Any}
 	inputchannel::Channel
 	outputchannel::Channel
 	outputtask::Ref{Task}
-	function MRDRemoteConnection(socket::IO; buffer::Int=1, spawn=false)
+	function MRDRemoteConnection(socket::IO; buffer::Real=Inf, spawn=true)
 
 		input = Channel(buffer, spawn=spawn) do c
 			message_id = read_id(socket)
@@ -94,6 +93,9 @@ function listen(port::Integer; kwargs...)
 	return MRDChannel(socket; kwargs...)
 end
 
+
+connect(addr, port::Integer) = Sockets.connect(addr,port) |> MRDChannel
+
 read_id(x) = Sockets.read(x,UInt16)
 
 Base.put!(c::MRDChannel,v) = put!(c.channel,v)
@@ -116,5 +118,6 @@ function read_header(socket::IO)
 	@assert message_id == UInt16(HEADER) "Expected HEADER message id, received $message_id"
 	return MRD.read_string(socket) |> MRD.MRDHeader
 end
+
 
 end
