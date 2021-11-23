@@ -3,14 +3,13 @@ import Sockets
 
 using PartialFunctions
 
-#include("Main.jl")
 include("MRD.jl")
 include("Types.jl")
 include("StreamAlgorithms.jl")
 
 @Base.enum fixed_message_ids::UInt16 FILENAME = 1 CONFIG = 2 HEADER = 3 CLOSE = 4 TEXT = 5 QUERY =6 RESPONSE = 7 ERROR = 8
 
-export listen, register_type, MRD, close, Stream
+export listen, connect,register_type, MRD, close, Stream
 
 
 const message_ids = Dict{UInt16,Type}([(1008,MRD.Acquisition),(1022,MRD.Image),(1026, MRD.Waveform,1026),(1050,Types.Bucket),(1051, Types.Bundle)])
@@ -119,5 +118,7 @@ function read_header(socket::IO)
 	return MRD.read_string(socket) |> MRD.MRDHeader
 end
 
+
+include("Main.jl")
 
 end

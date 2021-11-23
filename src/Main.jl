@@ -1,6 +1,7 @@
 module External 
 using  ArgParse 
 using Logging 
+using ..Gadgetron
 
 function parse_commandline()
 	s = ArgParseSettings()
@@ -27,29 +28,34 @@ function load_function(module_name, target)
 		throw(ErrorException("Using julia files directly is currently unsupported"))
 	end
 	loaded_module = Base.require(Main,Symbol(module_name))
-	func = Expr(:.,loaded_module,Symbol(target))
+	func_expr = Expr(:.,loaded_module,Symbol(target))
+	@debug "Created expression $func_expr"
 
-	return func 
+
+	return Meta.eval(func_expr)
 end
 
 function main()
 	args = parse_commandline()
 
+	Base.global_logger(ConsoleLogger(stdout,Logging.Debug ))
 
 	@debug "Starting external Julia module $(args[:module]) in state: [ACTIVE]"
 	@debug "Connection to parent on port $(args[:port])"
 
-	Base.global_logger(ConsoleLogger(stdout,Debug))
 
 	try
 		connection = Gadgetron.connect("localhost",args[:port])
 		func = load_function(args[:module],args[:target])
 		func(connection)
 	finally
-		close(connection)
+		println("Foo")
+		#close(connection)
 	end 
 
 end
+
+Base.precompile(Tuple{typeof(main)})   
 
 
 end 
