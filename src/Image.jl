@@ -187,3 +187,5 @@ function read(io::IO, ::Type{Image})
     return Image(ImageHeader(header), data, meta)
 
 end
+
+Base.precompile(Tuple{Type{RawImageHeader},Image})   # time: 0.089653455

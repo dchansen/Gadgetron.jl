@@ -1,8 +1,8 @@
 module External 
 using  ArgParse 
 using Logging 
-using ..Gadgetron
 import Dates 
+import ..Gadgetron
 
 function parse_commandline()
 	s = ArgParseSettings()
@@ -52,7 +52,6 @@ function main()
 	@info  "Starting external Julia module $(args[:module]) in state: [ACTIVE]"
 	@info "Connection to parent on port $(args[:port])"
 
-
 	func = load_function(args[:module],args[:target])
 	connection = Gadgetron.connect("localhost",args[:port])
 
@@ -65,6 +64,6 @@ function main()
 end
 
 Base.precompile(Tuple{typeof(main)})   
-
+Base.precompile(Tuple{typeof(load_function),String,String})   # time: 0.10844494
 
 end 

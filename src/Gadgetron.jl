@@ -92,6 +92,14 @@ function listen(port::Integer; kwargs...)
 	return MRDChannel(socket; kwargs...)
 end
 
+function listen(recon_function::Function, port::Integer; kwargs... )
+	connection = listen(port; kwargs...)
+	try 
+		recon_function(connection)
+	finally
+		close(connection)
+	end
+end
 
 connect(addr, port::Integer) = Sockets.connect(addr,port) |> MRDChannel
 
