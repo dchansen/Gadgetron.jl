@@ -196,9 +196,8 @@ end
 
     
 
-MRDHeader(x::String) = x |> parsexml |> MRDHeader
-
-
+MRDHeader(x::AbstractString) = x |> parsexml |> MRDHeader
+precompile(Tuple{typeof(MRDHeader),String})
 
 
     
