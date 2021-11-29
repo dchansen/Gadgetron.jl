@@ -63,8 +63,11 @@ function read(io::IO, ::Type{MetaDict})
 
 end
 
-function write(io::IO, meta::MetaDict)
-    if isempty(meta) return end
+function to_xml_string(meta::MetaDict)::String 
+    if isempty(meta) 
+        return ""
+    end
+
     doc = EzXML.XMLDocument()
     base = EzXML.ElementNode("ismrmrdMeta")
 
@@ -80,7 +83,10 @@ function write(io::IO, meta::MetaDict)
     buffer = IOBuffer()
     EzXML.print(buffer,doc)
     seekstart(buffer)
-    xml_string = buffer |> take! |> String 
-    MRD.write_string(io,xml_string,UInt64)
+    return  buffer |> take! |> String 
+end 
 
+
+function write(io::IO, meta::MetaDict)
+    MRD.write_string(io,to_xml_string(meta),UInt64)
 end
