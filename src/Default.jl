@@ -14,4 +14,6 @@ end
 function (def::default)(val::Any) 
     return val
 end 
+
+Optional{T} = Union{Nothing,T}
 end
