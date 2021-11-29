@@ -3,8 +3,8 @@ include("MetaDict.jl")
 
 export Image, ImageHeader, ImageFlags
 
-@enm ImageType::UInt16 magnitude = 1 phase = 2 real = 3 imag = 4 complex = 5
-@enm TypeIndex::UInt16 ushort = 1 short = 2 uint = 3 int = 4 float = 5 double = 6 cxfloat =
+@MRD.enm ImageType::UInt16 magnitude = 1 phase = 2 real = 3 imag = 4 complex = 5
+@MRD.enm TypeIndex::UInt16 ushort = 1 short = 2 uint = 3 int = 4 float = 5 double = 6 cxfloat =
     7 cxdouble = 8
 
 datatype_to_type = Base.Dict{TypeIndex.Enm,Type}([
@@ -64,12 +64,12 @@ end
 end
 
 
-struct Image{T<:Real}
+struct Image
     header::ImageHeader
-    data::Array{T,4}
+    data::Array{T,4} where {T<:Real}
     meta::MetaDict
-    function Image{T}(header::ImageHeader, data::Array{T}, meta = MetaDict())  where {T<:Real}
-        is_mrd_datatype(T) || error("Only MRD standard types supported")
+    function Image(header::ImageHeader, data::Array, meta = MetaDict())  
+        is_mrd_datatype(eltype(data)) || error("Only MRD standard types supported")
         ndims(data) <= 4 || error("Images have a maximum of 4 dimensions")
         data = reshape(data, Val(4))
         new(header, data, meta)
@@ -105,13 +105,15 @@ struct RawImageHeader
     image_series_index::UInt16
     user_int::NTuple{8,Int32}
     user_float::NTuple{8,Float32}
+    attribute_string_len::UInt32
 end
 
-function RawImageHeader(image::Image{T}) where {T}
+function RawImageHeader(image::Image) 
     channels = UInt16(size(image.data)[4])
     matrix_size = Tuple{UInt16,UInt16,UInt16}(size(image.data)[1:3])
-    data_type = type_to_datatype[T]
+    data_type = type_to_datatype[eltype(image.data)]
     hdr = image.header
+    attribute_string_len = ncodeunits(to_xml_string(image.meta))
 
     RawImageHeader(
         hdr.version,
@@ -139,6 +141,7 @@ function RawImageHeader(image::Image{T}) where {T}
         hdr.image_series_index,
         hdr.user_int,
         hdr.user_float,
+        attribute_string_len        
     )
 
 end
@@ -164,22 +167,25 @@ function ImageHeader(acq::AcquisitionHeader; kwargs...)
     return ImageHeader(;fields...)
 end 
 
-write(io::IO, header::RawImageHeader) = fieldnames(ImageHeader) .|> getfield $ header .|> write $ io
+write(io::IO, header::RawImageHeader) = fieldnames(RawImageHeader) .|> getfield $ header .|> MRD.unsafe_write $ io
 
 function write(io::IO, img::Image)
     write(io, RawImageHeader(img))
+    write(io,img.meta)
     Base.write(io, img.data)
 end
 
-read(io::IO, ::Type{RawImageHeader}) = RawImageHeader((fieldnames(ImageHeader) .|> fieldtype $ RawImageHeader .|> read $ io)...)
+read(io::IO, ::Type{RawImageHeader}) = RawImageHeader((fieldnames(RawImageHeader) .|> fieldtype $ RawImageHeader .|> MRD.unsafe_read $ io)...)
 
 function read(io::IO, ::Type{Image})
     header = MRD.read(io, RawImageHeader) 
     meta = MRD.read(io, MetaDict)
     data_type = datatype_to_type[header.data_type]
     
-    data = Array{data_type,4}(undef, header.matrix_size[0], header.matrix_size[1], header.matrix_size[2], header.channels)
+    data = Array{data_type,4}(undef, header.matrix_size[1], header.matrix_size[2], header.matrix_size[3], header.channels)
     Base.read!(io, data)
     return Image(ImageHeader(header), data, meta)
 
 end
+
+Base.precompile(Tuple{Type{RawImageHeader},Image})   # time: 0.089653455
