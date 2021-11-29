@@ -156,5 +156,4 @@ function write(io::IO, acq::Acquisition)
         Base.write(io::IO, acq.data)
 end
 
-
-
+Base.precompile(Tuple{Type{RawAcquisitionHeader},Acquisition})   # time: 0.0345262

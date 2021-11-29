@@ -1,6 +1,8 @@
 module External 
 using  ArgParse 
 using Logging 
+import Dates 
+import ..Gadgetron
 
 function parse_commandline()
 	s = ArgParseSettings()
@@ -27,29 +29,41 @@ function load_function(module_name, target)
 		throw(ErrorException("Using julia files directly is currently unsupported"))
 	end
 	loaded_module = Base.require(Main,Symbol(module_name))
-	func = Expr(:.,loaded_module,Symbol(target))
+	func_expr = Expr(:.,loaded_module,QuoteNode(Symbol(target)))
+	@debug "Created expression $func_expr"
 
-	return func 
+
+	return Meta.eval(func_expr)
+end
+
+function log_formatter(level, _module , group, id, file, line)
+	timestamp = Dates.format(Dates.now(),"m-d H:M:S.s")
+	prefix = "$timestamp $level [$file:$line] "
+	suffix = ""
+
+	return (:default, prefix, suffix )
 end
 
 function main()
 	args = parse_commandline()
 
+	Base.global_logger(ConsoleLogger(stdout,Logging.Info ))
 
-	@debug "Starting external Julia module $(args[:module]) in state: [ACTIVE]"
-	@debug "Connection to parent on port $(args[:port])"
+	@info  "Starting external Julia module $(args[:module]) in state: [ACTIVE]"
+	@info "Connection to parent on port $(args[:port])"
 
-	Base.global_logger(ConsoleLogger(stdout,Debug))
+	func = load_function(args[:module],args[:target])
+	connection = Gadgetron.connect("localhost",args[:port])
 
 	try
-		connection = Gadgetron.connect("localhost",args[:port])
-		func = load_function(args[:module],args[:target])
-		func(connection)
+		Base.invokelatest(func,connection)
 	finally
 		close(connection)
 	end 
 
 end
 
+Base.precompile(Tuple{typeof(main)})   
+Base.precompile(Tuple{typeof(load_function),String,String})   # time: 0.10844494
 
 end 

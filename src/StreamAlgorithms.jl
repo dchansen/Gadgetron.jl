@@ -60,6 +60,8 @@ function (sb::SplitBy)(iterable)
                     push!(c,buffer)
                     buffer = []
                 end 
+            else
+                push!(buffer,msg)
             end
         end 
         if !isempty(buffer) push!(c,buffer) end 
