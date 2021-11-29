@@ -21,6 +21,7 @@ SimpleTraits = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
 Sockets = "6462fe0b-24de-5631-8697-dd941f90decc"
 
 [compat]
+SimpleTraits = "0.9"
 Parameters = "0.12"
 FlagSets = "0.3"
 Setfield = "0.8"
