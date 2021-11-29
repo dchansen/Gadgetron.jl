@@ -102,7 +102,7 @@ end
 
 
 
-struct Acquisition
+mutable struct Acquisition
     header::AcquisitionHeader
     data::Array{ComplexF32,2}
     trajectory::Union{Array{Float32},Nothing} 
@@ -130,8 +130,8 @@ end
 end
 
 
-write(io::IO, header::RawAcquisitionHeader) = fieldnames(RawAcquisitionHeader) .|> getfield $ header .|> write $ io
-read(io::IO, ::Type{RawAcquisitionHeader}) = RawAcquisitionHeader((fieldnames(RawAcquisitionHeader) .|> fieldtype $ RawAcquisitionHeader .|> read $ io)...)
+write(io::IO, header::RawAcquisitionHeader) = fieldnames(RawAcquisitionHeader) .|> getfield $ header .|> MRD.unsafe_write $ io
+read(io::IO, ::Type{RawAcquisitionHeader}) = RawAcquisitionHeader((fieldnames(RawAcquisitionHeader) .|> fieldtype $ RawAcquisitionHeader .|> MRD.unsafe_read $ io)...)
 
 function read(io::IO, ::Type{Acquisition})
     header = MRD.read(io::IO, RawAcquisitionHeader)
@@ -156,5 +156,4 @@ function write(io::IO, acq::Acquisition)
         Base.write(io::IO, acq.data)
 end
 
-
-
+Base.precompile(Tuple{Type{RawAcquisitionHeader},Acquisition})   # time: 0.0345262
