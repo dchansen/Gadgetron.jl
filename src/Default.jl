@@ -16,5 +16,4 @@ function (def::default)(val::Any)
 end 
 
 Optional{T} = Union{Nothing,T}
-
 end
