@@ -1,8 +1,8 @@
 module Types 
 
-using ..Default : Optional
+using  ..Default
+using ..Gadgetron.MRD
 include("AcquisitionBucket.jl")
-
 struct SamplingLimit 
     min::UInt16
     center::UInt16
@@ -10,11 +10,11 @@ struct SamplingLimit
 end
 
 struct SamplingDescription
-    encoded_fov::NTuple{Float32,3}
-    recon_fov::NTuple{Float32,3}
-    encoded_matrix::NTuple{UInt16,3}
-    recon_matrix::NTuple{UInt16,3}
-    sampling_limits::NTuple{SamplingLimit,3}
+    encoded_fov::NTuple{3,Float32}
+    recon_fov::NTuple{3,Float32}
+    encoded_matrix::NTuple{3,UInt16}
+    recon_matrix::NTuple{3,UInt16}
+    sampling_limits::NTuple{3,SamplingLimit}
 end 
 
 struct ReconBuffer 

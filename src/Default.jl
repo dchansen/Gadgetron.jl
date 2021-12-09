@@ -1,6 +1,6 @@
 module Default 
 
-export default
+export default, Optional
 
 struct default{T}
     value::T

@@ -3,6 +3,7 @@ import Sockets
 
 using PartialFunctions
 
+include("Default.jl")
 include("MRD.jl")
 include("Types.jl")
 include("StreamAlgorithms.jl")
@@ -12,7 +13,7 @@ export listen, connect,register_type, MRD, close, Stream
 
 
 @Base.enum fixed_message_ids::UInt16 FILENAME = 1 CONFIG = 2 HEADER = 3 CLOSE = 4 TEXT = 5 QUERY =6 RESPONSE = 7 ERROR = 8
-const message_ids = Dict{UInt16,Type}([(1008,MRD.Acquisition),(1022,MRD.Image),(1026, MRD.Waveform,1026),(1050,Types.Bucket),(1051, Types.Bundle)])
+const message_ids = Dict{UInt16,Type}([(1008,MRD.Acquisition),(1022,MRD.Image),(1026, MRD.Waveform,1026),(1050,Types.AcquisitionBucket),(1051, Types.ReconBuffer)])
 const message_types = Dict(value => key for (key,value ) in message_ids)
 
 """
@@ -167,6 +168,5 @@ end
 
 
 include("Main.jl")
-include("Default.jl")
 
 end
