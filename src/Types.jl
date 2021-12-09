@@ -41,4 +41,4 @@ Base.setindex(rd::ReconData,val::ReconBit,i::Int) = rd.bits[i] = val
 Base.firstindex(rd::ReconData) = firstindex(rd.bits)
 Base.lastindex(rd::ReconData) = lastindex(rd.bits)
 
-
+end
