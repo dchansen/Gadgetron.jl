@@ -64,7 +64,7 @@ function read_acquisitions(io::IO, meta::bundle_meta)
 
     trajectories = [read_data_as_array(io,Float32,(head.number_of_samples,head.trajectory_dimensions)) for head in headers]
 
-    acqs = [read_data_as_array(io,ComplexF32,(head.active_channels,head.number_of_samples)) for head in headers]
+    acqs = [read_data_as_array(io,ComplexF32,(head.number_of_samples,head.active_channels)) for head in headers]
 
     return [MRD.Acquisition(MRD.AcquisitionHeader(header),data,trajectory) for (header,data,trajectory) in zip(headers,acqs,trajectories)]
 end
