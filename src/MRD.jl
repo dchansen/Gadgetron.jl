@@ -6,6 +6,7 @@ import EzXML
 using PartialFunctions
 using Parameters
 using Setfield
+using ..Default: Optional
 
 include("Enm.jl")
 include("serialization.jl")

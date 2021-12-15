@@ -1,6 +1,6 @@
 module Stream
 
-export Map, TakeWhile, SplitBy, Enumerate
+export Map, MapCat, TakeWhile, SplitBy, Enumerate
 
 struct Map 
     closure 
@@ -13,6 +13,23 @@ function (m::Map)(iterable  )
     Channel(m.buffer_size;m.kwparams...) do c
         for var in iterable 
             push!(c, m.closure(var))
+        end
+    end
+end
+
+struct MapCat 
+    closure 
+    kwparams
+    buffer_size 
+    MapCat(closure; buffer_size = 0,  kwparams...) = new(closure,kwparams, buffer_size)
+end
+
+function (m::MapCat)(iterable  )
+    Channel(m.buffer_size;m.kwparams...) do c
+        for iter in iterable 
+            for var in m.closure(iter)
+                push!(c,var)
+            end
         end
     end
 end

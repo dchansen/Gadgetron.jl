@@ -132,6 +132,7 @@ end
 
 write(io::IO, header::RawAcquisitionHeader) = fieldnames(RawAcquisitionHeader) .|> getfield $ header .|> MRD.unsafe_write $ io
 read(io::IO, ::Type{RawAcquisitionHeader}) = RawAcquisitionHeader((fieldnames(RawAcquisitionHeader) .|> fieldtype $ RawAcquisitionHeader .|> MRD.unsafe_read $ io)...)
+read(io::IO, ::Type{AcquisitionHeader}) = AcquisitionHeader(read(io,RawAcquisitionHeader))
 
 function read(io::IO, ::Type{Acquisition})
     header = MRD.read(io::IO, RawAcquisitionHeader)
