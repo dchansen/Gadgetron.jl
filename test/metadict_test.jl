@@ -1,5 +1,4 @@
-include("../src/Gadgetron.jl")
-using .Gadgetron
+using Gadgetron
 using Test 
 
 

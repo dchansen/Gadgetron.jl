@@ -90,7 +90,8 @@ Base.wait(m::MRDRemoteConnection) = wait(m.inputchannel)
 Base.put!(m::MRDRemoteConnection,v ) = put!(m.outputchannel,v)
 
 "Closes the connection by sending a close message and closing the network socket"
-function Base.close(m::MRDRemoteConnection) 
+function Base.close(m::MRDRemoteConnection)
+	if !isopen(m.outputchannel) return; end
 	close(m.outputchannel)
 	wait(m.outputtask[])
 	if typeof(m.socket) == Sockets.TCPSocket
@@ -141,6 +142,13 @@ end
 "Connect to an open MRD server "
 connect(addr, port::Integer) = Sockets.connect(addr,port) |> MRDChannel
 
+function connect(addr, port::Integer, config::String, header::MRD.MRDHeader) 
+	socket = Sockets.connect(addr,port )
+	write_config(socket,config)
+	write_header(socket, header)
+	return MRDChannel(config,header,MRDRemoteConnection(socket))
+end
+
 read_id(x) = Sockets.read(x,UInt16)
 
 Base.put!(c::MRDChannel,v) = put!(c.channel,v)
@@ -165,6 +173,18 @@ function read_header(socket::IO)
 	@assert message_id == UInt16(HEADER) "Expected HEADER message id, received $message_id"
 	return MRD.read_string(socket) |> MRD.MRDHeader
 end
+
+function write_config(socket::IO, config::String)
+	write(socket,CONFIG)
+	MRD.write_string(socket,config)
+end
+
+function write_header(socket::IO, header::MRD.MRDHeader)
+	write(socket,HEADER)
+	MRD.write_string(socket, string(header.aml))
+end
+
+
 
 
 include("Main.jl")

@@ -26,6 +26,11 @@ struct Waveform
     header::WaveformHeader
     data::Array{UInt32,2}
 end
+
+function Base.:(==)(wav1::Waveform, wav2::Waveform)
+    return wav1.header == wav2.header && wav1.data == wav2.data 
+end
+
 function RawWaveformHeader(wav::Waveform)
     names = fieldnames(WaveformHeader)
     fields = Dict((n,getfield(wav.header,n)) for n in names)

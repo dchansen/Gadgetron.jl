@@ -66,7 +66,7 @@ end
 
 struct Image
     header::ImageHeader
-    data::Array{T,4} where {T<:Real}
+    data::Array{T,4} where {T<:Number}
     meta::MetaDict
     function Image(header::ImageHeader, data::Array, meta = MetaDict())  
         is_mrd_datatype(eltype(data)) || error("Only MRD standard types supported")
@@ -75,6 +75,11 @@ struct Image
         new(header, data, meta)
     end
 
+end
+
+
+function Base.:(==)(img1::Image,img2::Image)
+    return img1.header == img2.header && img1.data == img2.data && img1.meta == img2.meta 
 end
 
 

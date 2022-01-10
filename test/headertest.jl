@@ -1,9 +1,7 @@
-include("../MRD.jl")
-import .MRD
+using Gadgetron
 using Test 
 using AcuteML
 import EzXML
-using Maybe 
 
 example_header = """<?xml version="1.0" encoding="utf-8"?>
 <ismrmrdHeader xmlns="http://www.ismrm.org/ISMRMRD" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ismrm.org/ISMRMRD ismrmrd.xsd">
@@ -62,16 +60,3 @@ end
 
 end
 
-@testset "HeaderMaybe" begin 
-
-   header = MRD.MRDHeader(example_header)
-   enc = @?  header.encoding[2]
-   @test enc === nothing 
-
-   systemInfo = @? header.encoding[1].acquisitionSystemInformation
-   @test systemInfo === nothing
-
-   noise = @? header.encoding[1].acquisitionSystemInformation.relativeNoiseBandwidth
-   @test noise === nothing 
-
-end

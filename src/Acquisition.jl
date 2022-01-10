@@ -108,15 +108,22 @@ mutable struct Acquisition
     trajectory::Union{Array{Float32},Nothing} 
 end
 
+Acquisition(hdr::AcquisitionHeader,data::Array{ComplexF32,2}) = Acquisition(hdr,data,nothing)
+
+function Base.:(==)(acq1::Acquisition,acq2::Acquisition)
+    traj_equal = acq1.trajectory === acq2.trajectory ||  acq1.trajectory == acq2.trajectory
+    return acq1.header == acq2.header && acq1.data == acq2.data && traj_equal
+end
+
 function RawAcquisitionHeader(acq::Acquisition)
     names = fieldnames(AcquisitionHeader)
     fields = Dict((n,getfield(acq.header,n)) for n in names)
     fields[:number_of_samples] = size(acq.data)[1]
     fields[:active_channels] = size(acq.data)[2]
-    if acq.trajectory === nothing 
+    if acq.trajectory !== nothing 
         fields[:trajectory_dimensions] = size(acq.trajectory)[1]
     else
-        fields[:trajectory_dimension] = 0
+        fields[:trajectory_dimensions] = 0
     end
 
     RawAcquisitionHeader((fieldnames(RawAcquisitionHeader) .|> n -> fields[n])...)
