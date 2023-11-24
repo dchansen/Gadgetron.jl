@@ -166,7 +166,7 @@ end
     userParameterLong::UN{Vector{UserParameter{Int64}}}=nothing,"~"
     userParameterDouble::UN{Vector{UserParameter{Float64}}}=nothing,"~"
     userParameterString::UN{Vector{UserParameter{String}}}=nothing,"~"
-    userParameterBase64::UN{Vector{UserParameter{Vector{UInt8}}}}=nothing,"~"
+    userParameterBase64::UN{Vector{UserParameter{String}}}=nothing,"~"
 end 
 
 @enm WaveformType ecg pulse respiratory trigger gradientwaveform other 
